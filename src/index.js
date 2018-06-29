@@ -1,20 +1,10 @@
 const {access: accessCallback} = require('fs')
 const {execFile: execFileCallback} = require('child_process')
 
-module.exports = class GitVersionWebpackPlugin {
-  constructor (options = {}) {
-    this.options = Object.assign({path: 'VERSION'}, options)
-  }
-
-  apply (compiler) {
-    compiler.plugin('emit', (compilation, callback) => {
-      update.call(this, compilation)
-        .then(callback)
-        .catch(callback)
-    })
-  }
-
-  async version () {
+module.exports = function GitVersionWebpackPlugin ({
+  path: versionFilePath = 'VERSION',
+} = {}) {
+  this.version = async () => {
     try {
       const describe = await execFile('git', ['describe', '--long', '--tags'])
       const [, tag, offset] = describe.toString().trim().match(/^(.*)-(\d+)-g[0-9a-f]+$/)
@@ -31,61 +21,88 @@ module.exports = class GitVersionWebpackPlugin {
 
     return `${branch.toString().trim()}@${hash.toString().substring(0, 7)}`
   }
-}
 
-async function update (compilation) {
-  const {path} = this.options
-  let version
+  const handleEmit = async ({assets, fileDependencies, contextDependencies}) => {
+    let version
 
-  // create the version file
-  try {
-    version = await this.version()
+    // create the version file
+    try {
+      version = await this.version()
 
-    compilation.assets[path] = {
-      source: () => version + '\n',
-      size: () => version.length + 1,
+      assets[versionFilePath] = {
+        source: () => version + '\n',
+        size: () => version.length + 1,
+      }
+    } catch (e) {
+      version = null
+
+      assets[versionFilePath] = {
+        source: () => '',
+        size: () => 0,
+      }
     }
-  } catch (e) {
-    version = null
 
-    compilation.assets[path] = {
-      source: () => '',
-      size: () => 0,
+    // watch for version changes
+    try {
+      await access('.git')
+    } catch (e) {
+      return // no .git directory
+    }
+
+    // commit hash and branch changes
+    if (fileDependencies.add) {
+      fileDependencies.add('.git/logs/HEAD')
+    } else {
+      fileDependencies.push('.git/logs/HEAD')
+    }
+
+    // tag changes
+    if (contextDependencies.add) {
+      contextDependencies.add('.git/refs/tags')
+    } else {
+      contextDependencies.push('.git/refs/tags')
     }
   }
 
-  // add version to template variables
-  compilation.plugin('html-webpack-plugin-before-html-generation', (data, callback) => {
-    const {plugin} = data
+  const handleHtml = async ({plugin}) => {
+    if (!plugin) throw new Error('Missing html-webpack-plugin data.')
 
-    if (!plugin) return callback(new Error('Missing plugin data.'))
+    let version
 
-    const jsonVersion = JSON.stringify(version)
+    try {
+      version = JSON.stringify(await this.version())
+    } catch (e) {
+      version = JSON.stringify(null)
+    }
+
     const {options: {templateParameters} = {}} = plugin
     const templateParametersType = typeof templateParameters
 
     if (templateParametersType === 'object') {
-      plugin.options.templateParameters.version = jsonVersion
+      plugin.options.templateParameters.version = version
     } else if (templateParametersType === 'function') {
       const originalFunction = templateParameters.versionWebpackPluginWrapped || templateParameters
 
       plugin.options.templateParameters = (...args) => {
-        return Object.assign({version: jsonVersion}, originalFunction(...args))
+        return Object.assign({version}, originalFunction(...args))
       }
       plugin.options.templateParameters.versionWebpackPluginWrapped = originalFunction
     }
+  }
 
-    callback()
-  })
+  this.apply = compiler => {
+    if (compiler.hooks) {
+      compiler.hooks.emit.tapPromise('GitVersionWebpackPlugin', handleEmit)
+      compiler.hooks.emit.tapPromise('htmlWebpackPluginBeforeHtmlGeneration', handleHtml)
+    } else {
+      compiler.plugin('emit', (compilation, callback) => {
+        handleEmit(compilation).then(callback).catch(callback)
+      })
 
-  // watch for version changes
-  try {
-    await access('.git')
-
-    compilation.fileDependencies.push('.git/logs/HEAD') // commit hash and branch changes
-    compilation.contextDependencies.push('.git/refs/tags') // tag changes
-  } catch (e) {
-    // no .git directory
+      compiler.plugin('html-webpack-plugin-before-html-generation', (data, callback) => {
+        handleHtml(data).then(callback).catch(callback)
+      })
+    }
   }
 }
 

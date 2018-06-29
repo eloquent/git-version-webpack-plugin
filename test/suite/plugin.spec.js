@@ -1,25 +1,23 @@
-const mkdirp = require('mkdirp-promise')
 const rmfr = require('rmfr')
 const {execFileSync} = require('child_process')
 const {expect} = require('chai')
-const {resolve} = require('path')
+const {mkdtempSync} = require('fs')
+const {tmpdir} = require('os')
 
 const GitVersionWebpackPlugin = require('../../src/index')
 
-const fixturePath = resolve(__dirname, '../fixture/project')
-
 describe('GitVersionWebpackPlugin', function () {
-  beforeEach(async function () {
+  beforeEach(function () {
     this.workingPath = process.cwd()
+    this.temporaryPath = mkdtempSync(tmpdir())
 
-    await mkdirp(fixturePath)
-    process.chdir(fixturePath)
+    process.chdir(this.temporaryPath)
   })
 
   afterEach(async function () {
     process.chdir(this.workingPath)
 
-    await rmfr(fixturePath)
+    await rmfr(this.temporaryPath)
   })
 
   context('when there is no .git directory', function () {
