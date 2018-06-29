@@ -44,7 +44,10 @@ clean-coverage:
 prepare: test prepare-lint
 
 .PHONY: ci
-ci: test ci-lint
+ci: artifacts/tests/coverage/lcov.info ci-lint
+	codecov
+
+.DELETE_ON_ERROR:
 
 node_modules: yarn.lock
 	yarn install
@@ -56,6 +59,9 @@ yarn.lock: package.json
 
 artifacts/tests/coverage/index.html: artifacts/tests/coverage/nyc
 	node_modules/.bin/nyc report --temp-directory $< --report-dir $(@D) --reporter=html
+
+artifacts/tests/coverage/lcov.info: artifacts/tests/coverage/nyc
+	node_modules/.bin/nyc report --temp-directory $< --report-dir $(@D) --reporter=lcovonly
 
 artifacts/tests/coverage/nyc: node_modules $(SRC) $(TEST_SRC)
 	@mkdir -p $@
