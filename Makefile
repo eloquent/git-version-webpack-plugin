@@ -7,7 +7,7 @@ TEST_SRC := $(shell find ./test -type f 2> /dev/null)
 
 .PHONY: test
 test: node_modules $(SRC) $(TEST_SRC)
-	NODE_ENV=test node_modules/.bin/mocha 'test/suite/**/*.spec.*'
+	NODE_ENV=test node_modules/.bin/mocha --colors 'test/suite/**/*.spec.*'
 
 .PHONY: coverage
 coverage: artifacts/tests/coverage/index.html
