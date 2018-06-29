@@ -2,3 +2,11 @@ language: node_js
 node_js:
 - node
 script: make ci
+before_deploy: yarn version --no-git-tag-version --new-version "$TRAVIS_TAG"
+deploy:
+  provider: npm
+  skip_cleanup: true
+  email: e@lqnt.co
+  api_key: $NPM_TOKEN
+  on:
+    tags: true
