@@ -1,6 +1,7 @@
 const rmfr = require('rmfr')
 const {execFileSync} = require('child_process')
 const {expect} = require('chai')
+const {join} = require('path')
 const {mkdtempSync} = require('fs')
 const {tmpdir} = require('os')
 
@@ -9,7 +10,7 @@ const GitVersionWebpackPlugin = require('../../src/index')
 describe('GitVersionWebpackPlugin', function () {
   beforeEach(function () {
     this.workingPath = process.cwd()
-    this.temporaryPath = mkdtempSync(process.env.CI ? '/tmp' : tmpdir())
+    this.temporaryPath = mkdtempSync(join(tmpdir(), 'git-version-webpack-plugin-'))
 
     process.chdir(this.temporaryPath)
   })
