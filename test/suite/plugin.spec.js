@@ -9,7 +9,7 @@ const GitVersionWebpackPlugin = require('../../src/index')
 describe('GitVersionWebpackPlugin', function () {
   beforeEach(function () {
     this.workingPath = process.cwd()
-    this.temporaryPath = mkdtempSync(tmpdir())
+    this.temporaryPath = mkdtempSync(process.env.CI ? '/tmp' : tmpdir())
 
     process.chdir(this.temporaryPath)
   })

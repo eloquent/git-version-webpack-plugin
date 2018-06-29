@@ -10,6 +10,3 @@ deploy:
   api_key: $NPM_TOKEN
   on:
     tags: true
-env:
-  global:
-    - TMPDIR=/tmp
