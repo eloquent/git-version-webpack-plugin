@@ -1,0 +1,13 @@
+{
+  "extends": [
+    "./.eslintrc.json"
+  ],
+  "rules": {
+    "no-alert": "error",
+    "no-console": "error",
+    "no-debugger": "error",
+    "no-unused-vars": "error",
+
+    "mocha/no-exclusive-tests": "error"
+  }
+}
