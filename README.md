@@ -57,6 +57,7 @@ appear before `GitVersionPlugin`.
 - Adds a single, concise, human-readable `VERSION` file to the Webpack output.
 - Integrates with [html-webpack-plugin], automatically adding a `VERSION`
   variable, accessible on the `window` object.
+- Works with or without [html-webpack-template].
 - Watches the Git directory for changes when using [webpack-serve] or
   [webpack-dev-server], so that the version always reflects the current Git tag
   or branch.
@@ -71,6 +72,7 @@ The following options can be passed to the plugin constructor:
            object. Defaults to `VERSION`.
 
 [html-webpack-plugin]: https://github.com/jantimon/html-webpack-plugin
+[html-webpack-template]: https://github.com/jaketrent/html-webpack-template
 [output path]: https://webpack.js.org/configuration/output/#output-path
 [webpack-dev-server]: https://github.com/webpack/webpack-dev-server
 [webpack-serve]: https://github.com/webpack-contrib/webpack-serve

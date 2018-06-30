@@ -23,7 +23,17 @@ module.exports = function GitVersionWebpackPlugin ({
     return `${branch.toString().trim()}@${hash.toString().substring(0, 7)}`
   }
 
-  const handleHtml = async ({body}) => {
+  const handleBeforeHtml = async ({plugin}) => {
+    const {options = {}} = plugin
+    const {window = {}} = options
+
+    window[versionName] = await this.version()
+
+    options.window = window
+    plugin.options = options
+  }
+
+  const handleAssetTags = async ({body}) => {
     const version = await this.version()
 
     body.unshift({
@@ -37,7 +47,8 @@ module.exports = function GitVersionWebpackPlugin ({
   }
 
   const handleCompilation = compilation => {
-    tapPromise(compilation, 'htmlWebpackPluginAlterAssetTags', 'html-webpack-plugin-alter-asset-tags', handleHtml)
+    tapPromise(compilation, 'htmlWebpackPluginBeforeHtmlGeneration', 'html-webpack-plugin-before-html-generation', handleBeforeHtml)
+    tapPromise(compilation, 'htmlWebpackPluginAlterAssetTags', 'html-webpack-plugin-alter-asset-tags', handleAssetTags)
   }
 
   const handleEmit = async ({assets, fileDependencies, contextDependencies}) => {
