@@ -3,6 +3,7 @@ const {execFile: execFileCallback} = require('child_process')
 
 module.exports = function GitVersionWebpackPlugin ({
   path: versionFilePath = 'VERSION',
+  name: versionName = 'VERSION',
 } = {}) {
   this.version = async () => {
     try {
@@ -20,6 +21,23 @@ module.exports = function GitVersionWebpackPlugin ({
     ])
 
     return `${branch.toString().trim()}@${hash.toString().substring(0, 7)}`
+  }
+
+  const handleHtml = async ({body}) => {
+    const version = await this.version()
+
+    body.unshift({
+      tagName: 'script',
+      closeTag: true,
+      attributes: {
+        type: 'text/javascript',
+      },
+      innerHTML: `window[${JSON.stringify(versionName)}] = ${JSON.stringify(version)}`,
+    })
+  }
+
+  const handleCompilation = compilation => {
+    tapPromise(compilation, 'htmlWebpackPluginAlterAssetTags', 'html-webpack-plugin-alter-asset-tags', handleHtml)
   }
 
   const handleEmit = async ({assets, fileDependencies, contextDependencies}) => {
@@ -64,45 +82,27 @@ module.exports = function GitVersionWebpackPlugin ({
     }
   }
 
-  const handleHtml = async ({plugin}) => {
-    if (!plugin) throw new Error('Missing html-webpack-plugin data.')
-
-    let version
-
-    try {
-      version = JSON.stringify(await this.version())
-    } catch (e) {
-      version = JSON.stringify(null)
-    }
-
-    const {options: {templateParameters} = {}} = plugin
-    const templateParametersType = typeof templateParameters
-
-    if (templateParametersType === 'object') {
-      plugin.options.templateParameters.version = version
-    } else if (templateParametersType === 'function') {
-      const originalFunction = templateParameters.versionWebpackPluginWrapped || templateParameters
-
-      plugin.options.templateParameters = (...args) => {
-        return Object.assign({version}, originalFunction(...args))
-      }
-      plugin.options.templateParameters.versionWebpackPluginWrapped = originalFunction
-    }
-  }
-
   this.apply = compiler => {
-    if (compiler.hooks) {
-      compiler.hooks.emit.tapPromise('GitVersionWebpackPlugin', handleEmit)
-      compiler.hooks.emit.tapPromise('htmlWebpackPluginBeforeHtmlGeneration', handleHtml)
-    } else {
-      compiler.plugin('emit', (compilation, callback) => {
-        handleEmit(compilation).then(callback).catch(callback)
-      })
+    tap(compiler, 'compilation', 'compilation', handleCompilation)
+    tapPromise(compiler, 'emit', 'emit', handleEmit)
+  }
+}
 
-      compiler.plugin('html-webpack-plugin-before-html-generation', (data, callback) => {
-        handleHtml(data).then(callback).catch(callback)
-      })
-    }
+function tap (subject, name, legacyName, handler) {
+  if (subject.hooks) {
+    subject.hooks[name].tap('GitVersionWebpackPlugin', handler)
+  } else {
+    subject.plugin(legacyName, handler)
+  }
+}
+
+function tapPromise (subject, name, legacyName, handler) {
+  if (subject.hooks) {
+    subject.hooks[name].tapPromise('GitVersionWebpackPlugin', handler)
+  } else {
+    subject.plugin(legacyName, (data, callback) => {
+      handler(data).then(callback).catch(callback)
+    })
   }
 }
 

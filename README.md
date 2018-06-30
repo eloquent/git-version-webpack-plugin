@@ -19,7 +19,7 @@
 
 [@eloquent/git-version-webpack-plugin]: https://www.npmjs.com/package/@eloquent/git-version-webpack-plugin
 
-## Usage
+### Standalone usage
 
 ~~~js
 // webpack.config.js
@@ -33,18 +33,33 @@ module.exports = {
 }
 ~~~
 
+### Usage with [html-webpack-plugin]
+
+~~~js
+// webpack.config.js
+
+const GitVersionPlugin = require('@eloquent/git-version-webpack-plugin')
+const HtmlPlugin = require('html-webpack-plugin')
+
+module.exports = {
+  plugins: [
+    new HtmlPlugin(),
+    new GitVersionPlugin(),
+  ],
+}
+~~~
+
+Note that the order of plugins is significant. That is, `HtmlWebpackPlugin` must
+appear before `GitVersionPlugin`.
+
 ## Features
 
 - Adds a single, concise, human-readable `VERSION` file to the Webpack output.
-- Integrates with [html-webpack-plugin] by adding a `version` template
-  parameter.
+- Integrates with [html-webpack-plugin], automatically adding a `VERSION`
+  variable, accessible on the `window` object.
 - Watches the Git directory for changes when using [webpack-serve] or
   [webpack-dev-server], so that the version always reflects the current Git tag
   or branch.
-
-[html-webpack-plugin]: https://github.com/jantimon/html-webpack-plugin
-[webpack-dev-server]: https://github.com/webpack/webpack-dev-server
-[webpack-serve]: https://github.com/webpack-contrib/webpack-serve
 
 ## Configuration
 
@@ -52,5 +67,10 @@ The following options can be passed to the plugin constructor:
 
 - `path` - The path to use for the version file, relative to the [output path].
            Defaults to `VERSION`.
+- `name` - The name to use for the version variable, accessible on the `window`
+           object. Defaults to `VERSION`.
 
+[html-webpack-plugin]: https://github.com/jantimon/html-webpack-plugin
 [output path]: https://webpack.js.org/configuration/output/#output-path
+[webpack-dev-server]: https://github.com/webpack/webpack-dev-server
+[webpack-serve]: https://github.com/webpack-contrib/webpack-serve
