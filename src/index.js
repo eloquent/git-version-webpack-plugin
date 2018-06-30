@@ -78,19 +78,8 @@ module.exports = function GitVersionWebpackPlugin ({
       return // no .git directory
     }
 
-    // commit hash and branch changes
-    if (fileDependencies.add) {
-      fileDependencies.add('.git/logs/HEAD')
-    } else {
-      fileDependencies.push('.git/logs/HEAD')
-    }
-
-    // tag changes
-    if (contextDependencies.add) {
-      contextDependencies.add('.git/refs/tags')
-    } else {
-      contextDependencies.push('.git/refs/tags')
-    }
+    addOrPush(fileDependencies, '.git/logs/HEAD') // commit hash and branch changes
+    addOrPush(contextDependencies, '.git/refs/tags') // tag changes
   }
 
   this.apply = compiler => {
@@ -115,6 +104,10 @@ function tapPromise (subject, name, legacyName, handler) {
       handler(data).then(callback).catch(callback)
     })
   }
+}
+
+function addOrPush (subject, entry) {
+  subject.add ? subject.add(entry) : subject.push(entry)
 }
 
 function execFile (command, args) {
