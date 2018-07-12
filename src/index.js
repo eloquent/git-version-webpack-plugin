@@ -23,7 +23,8 @@ module.exports = function GitVersionWebpackPlugin ({
     return `${branch.toString().trim()}@${hash.toString().substring(0, 7)}`
   }
 
-  const handleBeforeHtml = async ({plugin}) => {
+  const handleBeforeHtml = async data => {
+    const {plugin} = data
     const {options = {}} = plugin
     const {window = {}} = options
 
@@ -31,10 +32,14 @@ module.exports = function GitVersionWebpackPlugin ({
 
     options.window = window
     plugin.options = options
+
+    return data
   }
 
-  const handleAssetTags = async ({body}) => {
+  const handleAssetTags = async data => {
     const version = await this.version()
+
+    const {body} = data
 
     body.unshift({
       tagName: 'script',
@@ -44,6 +49,8 @@ module.exports = function GitVersionWebpackPlugin ({
       },
       innerHTML: `window[${JSON.stringify(versionName)}] = ${JSON.stringify(version)}`,
     })
+
+    return data
   }
 
   const handleCompilation = compilation => {
@@ -101,7 +108,9 @@ function tapPromise (subject, name, legacyName, handler) {
     subject.hooks[name].tapPromise('GitVersionWebpackPlugin', handler)
   } else {
     subject.plugin(legacyName, (data, callback) => {
-      handler(data).then(callback).catch(callback)
+      handler(data)
+        .then(data => callback(null, data))
+        .catch(callback)
     })
   }
 }
