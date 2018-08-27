@@ -129,4 +129,16 @@ describe('GitVersionWebpackPlugin', function () {
       })
     })
   })
+
+  context('when the version is manually specified', function () {
+    beforeEach(function () {
+      this.subject = new GitVersionWebpackPlugin({version: 'version-a'})
+    })
+
+    describe('version()', function () {
+      it('should return the specified version', async function () {
+        expect(await this.subject.version()).to.equal('version-a')
+      })
+    })
+  })
 })

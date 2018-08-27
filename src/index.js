@@ -4,8 +4,11 @@ const {execFile: execFileCallback} = require('child_process')
 module.exports = function GitVersionWebpackPlugin ({
   path: versionFilePath = 'VERSION',
   name: versionName = 'VERSION',
+  version: userVersion = '',
 } = {}) {
   this.version = async () => {
+    if (userVersion) return userVersion
+
     try {
       const describe = await execFile('git', ['describe', '--long', '--tags'])
       const [, tag, offset] = describe.toString().trim().match(/^(.*)-(\d+)-g[0-9a-f]+$/)
@@ -83,6 +86,8 @@ module.exports = function GitVersionWebpackPlugin ({
         size: () => 0,
       }
     }
+
+    if (userVersion) return
 
     // watch for version changes
     try {

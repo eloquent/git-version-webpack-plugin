@@ -66,10 +66,12 @@ appear before `GitVersionPlugin`.
 
 The following options can be passed to the plugin constructor:
 
-- `path` - The path to use for the version file, relative to the [output path].
-           Defaults to `VERSION`.
-- `name` - The name to use for the version variable, accessible on the `window`
-           object. Defaults to `VERSION`.
+- `path`    - The path to use for the version file, relative to the
+              [output path]. Defaults to `VERSION`.
+- `name`    - The name to use for the version variable, accessible on the
+              `window` object. Defaults to `VERSION`.
+- `version` - Can be used to manually override the version. Useful in the event
+              that Git is not available.
 
 [html-webpack-plugin]: https://github.com/jantimon/html-webpack-plugin
 [html-webpack-template]: https://github.com/jaketrent/html-webpack-template
