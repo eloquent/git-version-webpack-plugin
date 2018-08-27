@@ -28,7 +28,11 @@ module.exports = function GitVersionWebpackPlugin ({
     const {options = {}} = plugin
     const {window = {}} = options
 
-    window[versionName] = await this.version()
+    try {
+      window[versionName] = await this.version()
+    } catch (e) {
+      window[versionName] = ''
+    }
 
     options.window = window
     plugin.options = options
@@ -37,7 +41,13 @@ module.exports = function GitVersionWebpackPlugin ({
   }
 
   const handleAssetTags = async data => {
-    const version = await this.version()
+    let version
+
+    try {
+      version = await this.version()
+    } catch (e) {
+      version = ''
+    }
 
     const {body} = data
 
@@ -59,19 +69,15 @@ module.exports = function GitVersionWebpackPlugin ({
   }
 
   const handleEmit = async ({assets, fileDependencies, contextDependencies}) => {
-    let version
-
     // create the version file
     try {
-      version = await this.version()
+      const version = await this.version()
 
       assets[versionFilePath] = {
         source: () => version + '\n',
         size: () => version.length + 1,
       }
     } catch (e) {
-      version = null
-
       assets[versionFilePath] = {
         source: () => '',
         size: () => 0,
