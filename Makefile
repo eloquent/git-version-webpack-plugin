@@ -54,7 +54,7 @@ node_modules: yarn.lock
 	@touch $@
 
 yarn.lock: package.json
-	yarn check --integrity || yarn upgrade
+	yarn check --integrity || yarn install
 	@touch $@
 
 artifacts/tests/coverage/index.html: artifacts/tests/coverage/nyc
