@@ -6,6 +6,9 @@
   "repository": "git@github.com:eloquent/git-version-webpack-plugin.git",
   "author": "Erin Millard <ezzatron@gmail.com>",
   "license": "MIT",
+  "files": [
+    "src"
+  ],
   "peerDependencies": {
     "webpack": "^3 || ^4"
   },
