@@ -1,16 +1,63 @@
-const {access: accessCallback} = require('fs')
-const {execFile: execFileCallback} = require('child_process')
+const HtmlPlugin = require('safe-require')('html-webpack-plugin')
+const validateOptions = require('schema-utils')
+const {access: accessCps} = require('fs')
+const {execFile: execFileCps} = require('child_process')
+const {promisify} = require('util')
 
-module.exports = function GitVersionWebpackPlugin ({
-  path: versionFilePath = 'VERSION',
-  name: versionName = 'VERSION',
-  version: userVersion = '',
-} = {}) {
-  this.version = async () => {
+const access = promisify(accessCps)
+const execFile = promisify(execFileCps)
+
+const PLUGIN_NAME = 'GitVersionWebpackPlugin'
+
+const optionsSchema = {
+  $schema: 'http://json-schema.org/draft-07/schema#',
+  $id: 'https://lqnt.co/git-version-webpack-plugin/config.schema.json',
+  title: 'Eloquent Git version Webpack plugin configuration',
+  description: 'The configuration for an instance of the Eloquent Git version Webpack plugin',
+  type: 'object',
+  additionalProperties: false,
+  properties: {
+    path: {
+      description: 'The path to use for the version file, relative to the output path',
+      type: 'string',
+      minLength: 1,
+      default: 'VERSION',
+    },
+    name: {
+      description: 'The name to use for the version variable, accessible on the window object',
+      type: 'string',
+      minLength: 1,
+      default: 'VERSION',
+    },
+    version: {
+      description: 'Can be used to manually override the version. Useful in the event that Git is not available',
+      type: 'string',
+      default: '',
+    },
+  },
+}
+
+module.exports = function GitVersionWebpackPlugin (options = {}) {
+  validateOptions(optionsSchema, options, '@eloquent/git-version-webpack-plugin')
+
+  const {
+    path: versionFilePath = 'VERSION',
+    name: versionName = 'VERSION',
+    version: userVersion = '',
+  } = options
+
+  this.apply = compiler => {
+    compiler.hooks.compilation.tap(PLUGIN_NAME, handleCompilation)
+    compiler.hooks.emit.tapPromise(PLUGIN_NAME, handleEmit)
+  }
+
+  this.version = version
+
+  async function version () {
     if (userVersion) return userVersion
 
     try {
-      const describe = await execFile('git', ['describe', '--long', '--tags'])
+      const {stdout: describe} = await execFile('git', ['describe', '--long', '--tags'])
       const [, tag, offset] = describe.toString().trim().match(/^(.*)-(\d+)-g[0-9a-f]+$/)
 
       if (parseInt(offset) === 0) return tag
@@ -18,7 +65,7 @@ module.exports = function GitVersionWebpackPlugin ({
       // no tags
     }
 
-    const [branch, hash] = await Promise.all([
+    const [{stdout: branch}, {stdout: hash}] = await Promise.all([
       execFile('git', ['rev-parse', '--abbrev-ref', 'HEAD']),
       execFile('git', ['rev-parse', 'HEAD']),
     ])
@@ -26,59 +73,23 @@ module.exports = function GitVersionWebpackPlugin ({
     return `${branch.toString().trim()}@${hash.toString().substring(0, 7)}`
   }
 
-  const handleBeforeHtml = async data => {
-    const {plugin} = data
-    const {options = {}} = plugin
-    const {window = {}} = options
-
-    try {
-      window[versionName] = await this.version()
-    } catch (e) {
-      window[versionName] = ''
+  function handleCompilation (compilation) {
+    if (HtmlPlugin.getHooks) {
+      HtmlPlugin.getHooks(compilation).alterAssetTags.tapPromise(PLUGIN_NAME, handleAlterAssetTags)
+    } else {
+      compilation.hooks.htmlWebpackPluginAlterAssetTags &&
+        compilation.hooks.htmlWebpackPluginAlterAssetTags.tapPromise(PLUGIN_NAME, handleAlterAssetTagsV3)
     }
-
-    options.window = window
-    plugin.options = options
-
-    return data
   }
 
-  const handleAssetTags = async data => {
-    let version
-
-    try {
-      version = await this.version()
-    } catch (e) {
-      version = ''
-    }
-
-    const {body} = data
-
-    body.unshift({
-      tagName: 'script',
-      closeTag: true,
-      attributes: {
-        type: 'text/javascript',
-      },
-      innerHTML: `window[${JSON.stringify(versionName)}] = ${JSON.stringify(version)}`,
-    })
-
-    return data
-  }
-
-  const handleCompilation = compilation => {
-    tapPromise(compilation, 'htmlWebpackPluginBeforeHtmlGeneration', 'html-webpack-plugin-before-html-generation', handleBeforeHtml)
-    tapPromise(compilation, 'htmlWebpackPluginAlterAssetTags', 'html-webpack-plugin-alter-asset-tags', handleAssetTags)
-  }
-
-  const handleEmit = async ({assets, fileDependencies, contextDependencies}) => {
+  async function handleEmit ({assets, fileDependencies, contextDependencies}) {
     // create the version file
     try {
-      const version = await this.version()
+      const v = await version()
 
       assets[versionFilePath] = {
-        source: () => version + '\n',
-        size: () => version.length + 1,
+        source: () => v + '\n',
+        size: () => v.length + 1,
       }
     } catch (e) {
       assets[versionFilePath] = {
@@ -96,52 +107,53 @@ module.exports = function GitVersionWebpackPlugin ({
       return // no .git directory
     }
 
-    addOrPush(fileDependencies, '.git/logs/HEAD') // commit hash and branch changes
-    addOrPush(contextDependencies, '.git/refs/tags') // tag changes
+    fileDependencies.add('.git/logs/HEAD') // commit hash and branch changes
+    contextDependencies.add('.git/refs/tags') // tag changes
   }
 
-  this.apply = compiler => {
-    tap(compiler, 'compilation', 'compilation', handleCompilation)
-    tapPromise(compiler, 'emit', 'emit', handleEmit)
-  }
-}
+  async function handleAlterAssetTags (data) {
+    let v
 
-function tap (subject, name, legacyName, handler) {
-  if (subject.hooks) {
-    subject.hooks[name].tap('GitVersionWebpackPlugin', handler)
-  } else {
-    subject.plugin(legacyName, handler)
-  }
-}
+    try {
+      v = await version()
+    } catch (e) {
+      v = ''
+    }
 
-function tapPromise (subject, name, legacyName, handler) {
-  if (subject.hooks) {
-    subject.hooks[name].tapPromise('GitVersionWebpackPlugin', handler)
-  } else {
-    subject.plugin(legacyName, (data, callback) => {
-      handler(data)
-        .then(data => callback(null, data))
-        .catch(callback)
+    const {assetTags: {scripts}} = data
+
+    scripts.unshift({
+      tagName: 'script',
+      voidTag: false,
+      attributes: {
+        type: 'text/javascript',
+      },
+      innerHTML: `window[${JSON.stringify(versionName)}] = ${JSON.stringify(v)}`,
     })
+
+    return data
   }
-}
 
-function addOrPush (subject, entry) {
-  subject.add ? subject.add(entry) : subject.push(entry)
-}
+  async function handleAlterAssetTagsV3 (data) {
+    let v
 
-function execFile (command, args) {
-  return new Promise((resolve, reject) => {
-    execFileCallback(command, args, (error, stdout) => {
-      if (error) return reject(error)
+    try {
+      v = await version()
+    } catch (e) {
+      v = ''
+    }
 
-      return resolve(stdout)
+    const {body} = data
+
+    body.unshift({
+      tagName: 'script',
+      closeTag: true,
+      attributes: {
+        type: 'text/javascript',
+      },
+      innerHTML: `window[${JSON.stringify(versionName)}] = ${JSON.stringify(v)}`,
     })
-  })
-}
 
-function access (path) {
-  return new Promise((resolve, reject) => {
-    accessCallback(path, error => error ? reject(error) : resolve())
-  })
+    return data
+  }
 }

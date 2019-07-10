@@ -2,15 +2,26 @@
   "name": "@eloquent/git-version-webpack-plugin",
   "version": "0.0.0",
   "description": "Pull Git version information into Webpack.",
-  "main": "src/index.js",
   "repository": "git@github.com:eloquent/git-version-webpack-plugin.git",
   "author": "Erin Millard <ezzatron@gmail.com>",
   "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "src/index.js",
   "files": [
-    "src"
+    "/src/"
   ],
+  "engines": {
+    "node": ">=10"
+  },
   "peerDependencies": {
-    "webpack": "^3 || ^4"
+    "html-webpack-plugin": "^3 || ^4.0.0-beta",
+    "webpack": "^4"
+  },
+  "dependencies": {
+    "safe-require": "^1.0.3",
+    "schema-utils": "^1.0.0"
   },
   "devDependencies": {
     "chai": "^4.1.2",
@@ -23,11 +34,10 @@
     "eslint-plugin-node": "^9.1.0",
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.0",
+    "html-webpack-plugin": "^4.0.0-beta.5",
     "mocha": "^6.1.4",
     "nyc": "^14.1.1",
-    "rmfr": "^2.0.0"
-  },
-  "publishConfig": {
-    "access": "public"
+    "rmfr": "^2.0.0",
+    "webpack": "^4.35.3"
   }
 }
