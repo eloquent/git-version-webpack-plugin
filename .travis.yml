@@ -1,16 +1,13 @@
 language: node_js
 node_js:
 - node
+cache: yarn
 script: make ci
 before_deploy: yarn version --no-git-tag-version --new-version "$TRAVIS_TAG"
 deploy:
   provider: npm
   skip_cleanup: true
   email: e@lqnt.co
-  api_key: "$NPM_TOKEN"
+  api_key: IIQ1RTqfw5OV/HtxST81JyX7cp2wfSKut4+wvmciBi3qlfpV+kolqTuuFNONdrF/WXuLj72WW4BYeOZidKIHl2Bp13b1JBINghAiXEoA1So5M0azGDKr3pFR92Qo6L55QnUOo/ec1i7RO29WJHAw2Tdn7DKArGfsMPaWPpy1bXl0p5NMSQbpIhelIFDdRUv9IUym0KWWaUr7yqbV5jv7KxK3odK9vGpJX+/fn8r87hA2d99WnuB+rFC7ibKeZZMniWWmyyZe8zNLosv0SN/XJR5Z6MuooPHx8wsm63AQG9sIPW63QToOub7nEAS2b/1Y4NfbXu7yIKmmP8FGtHhVeqs9L1Ui+RekQrOGuZtNb917KLGkrYzyvBlHveLFO7nWimphkVq5HZwyNqoZ2EXd7KRJNiqoCweDf9efTyieTEl5qBjWM8MQ+2KQOhAyf2c1AaX7Q8yBoDdrQSU3C9crRJln9lMauG3JX8i8XkmD0IklqQ26GJc7pkbw33DzY66BWqPfrNUGhelK0Gq1l9MZ/gda8zqEn//K4WEqk2EsDxawae//acdV8yX6n2bU2wDJ9Ex5GgtDI+FkVnGdNKSZgg+LI/Tr+keNAykAlzUvuKk9uQmEEYFEIEaVTokG9SKL897d+MXr1l0AEnQ2n2+sEhiFnzzx+1FPFzR99CXQWKg=
   on:
     tags: true
-cache: yarn
-env:
-  global:
-    secure: oJEVpltIIOzIavlJtEU3dsz/AFeX7EvialTEQtRQuU/X2dCcB1VD9IhlLd3NhvBlsbx2dU6jCI0C/Kd75duyZjRQ/M7iVvubW2dLJntIVLlZ6Wv/dSfs1IYlh+EfIdFJB8s9GGKptYMzYyxa0RUsaTe/zanBvTp/mao7QaHNHod9CGnwbOqGED5vglNv+LpMRALMAyrXcFc65jVdko1pzvW9ZqFxnlgEvagPuSuEhBtn2xvPq6K3LlIt1LkQoW0amYLxUr4WkPFi2iX5ffndcERy1YpArfWdvkjEa/2hShYPxmp3xDlc7O7bSXJTHvXqBjiXdw9tAJxX9OadufdmQeQmrwwM81T1BIf06PD+z2PqZRHVIx6qHoF3Bv2JSraXlR+JQAPJkoBzq2h6ujeRFK+2ZqN6PEhkD0jLaAaHrhKyw0y05mrd4gFh9449JkUOJPBG1yrvG0Iz9th1OU2T9WmJRQs7McM/O9LYZNowz6z9GdBST2Z8cuC9auQQDRNrdrX/VBVm4N3NC4rW4ZIDwFYPkIKmpeMLkbNxgQWhn2Vl/qy+C5xeec+/qtKa8CxhAWBZKFDzQEvdP7hqdUB8LIKpLmmgLx+4p9XccV+Q7U9k75NTqp28TRv8oZoWm7tIEudRDakmSEq+wfNxNhg+DhszrqqiLyfu9ixttxwYAUI=
