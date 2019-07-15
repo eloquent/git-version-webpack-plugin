@@ -6,9 +6,9 @@
 [![Current build status image][build-image]][current build status]
 [![Current coverage status image][coverage-image]][current coverage status]
 
-[build-image]: https://img.shields.io/travis/com/eloquent/git-version-webpack-plugin/master.svg?style=flat-square "Current build status for the master branch"
+[build-image]: https://img.shields.io/travis/eloquent/git-version-webpack-plugin/master.svg?style=flat-square "Current build status for the master branch"
 [coverage-image]: https://img.shields.io/codecov/c/github/eloquent/git-version-webpack-plugin/master.svg?style=flat-square "Current test coverage for the master branch"
-[current build status]: https://travis-ci.com/eloquent/git-version-webpack-plugin
+[current build status]: https://travis-ci.org/eloquent/git-version-webpack-plugin
 [current coverage status]: https://codecov.io/github/eloquent/git-version-webpack-plugin
 [current version]: https://www.npmjs.com/package/@eloquent/git-version-webpack-plugin
 [version-image]: https://img.shields.io/npm/v/@eloquent/git-version-webpack-plugin.svg?style=flat-square "This project uses semantic versioning"
