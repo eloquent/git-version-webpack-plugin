@@ -15,13 +15,15 @@
   "engines": {
     "node": ">=10"
   },
-  "peerDependencies": {
-    "html-webpack-plugin": "^3 || ^4.0.0-beta",
-    "webpack": "^4"
-  },
   "dependencies": {
     "safe-require": "^1.0.3",
     "schema-utils": "^2.1.0"
+  },
+  "peerDependencies": {
+    "webpack": "^4"
+  },
+  "optionalDependencies": {
+    "html-webpack-plugin": "^3 || ^4.0.0-beta"
   },
   "devDependencies": {
     "chai": "^4.1.2",
@@ -34,7 +36,6 @@
     "eslint-plugin-node": "^9.1.0",
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.1",
-    "html-webpack-plugin": "^4.0.0-beta.7",
     "mocha": "^6.2.0",
     "nyc": "^14.1.1",
     "rmfr": "^2.0.0",
