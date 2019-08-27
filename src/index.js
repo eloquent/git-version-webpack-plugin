@@ -38,7 +38,10 @@ const optionsSchema = {
 }
 
 module.exports = function GitVersionWebpackPlugin (options = {}) {
-  validateOptions(optionsSchema, options, '@eloquent/git-version-webpack-plugin')
+  validateOptions(optionsSchema, options, {
+    baseDataPath: 'options',
+    name: '@eloquent/git-version-webpack-plugin',
+  })
 
   const {
     path: versionFilePath = 'VERSION',
