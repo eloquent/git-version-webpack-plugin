@@ -77,7 +77,7 @@ module.exports = function GitVersionWebpackPlugin (options = {}) {
   }
 
   function handleCompilation (compilation) {
-    if (HtmlPlugin.getHooks) {
+    if (HtmlPlugin && HtmlPlugin.getHooks) {
       HtmlPlugin.getHooks(compilation).alterAssetTags.tapPromise(PLUGIN_NAME, handleAlterAssetTags)
     } else {
       compilation.hooks.htmlWebpackPluginAlterAssetTags &&
