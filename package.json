@@ -23,21 +23,18 @@
     "webpack": "^4"
   },
   "optionalDependencies": {
-    "html-webpack-plugin": "^3 || ^4.0.0-beta"
+    "html-webpack-plugin": "^4"
   },
   "devDependencies": {
-    "chai": "^4.1.2",
     "codecov": "^3.0.2",
-    "dirty-chai": "^2.0.1",
-    "eslint": "^6.2.2",
+    "eslint": "^7.8.1",
     "eslint-config-standard": "^14.0.1",
     "eslint-plugin-import": "^2.18.2",
-    "eslint-plugin-mocha": "^6.1.0",
-    "eslint-plugin-node": "^9.1.0",
+    "eslint-plugin-jest": "^23.20.0",
+    "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.1",
-    "mocha": "^6.2.0",
-    "nyc": "^14.1.1",
+    "jest": "^26.4.2",
     "rmfr": "^2.0.0",
     "webpack": "^4.35.3"
   }
