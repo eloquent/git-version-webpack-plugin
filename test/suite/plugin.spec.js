@@ -1,143 +1,140 @@
 const rmfr = require('rmfr')
 const {execFileSync} = require('child_process')
-const {expect} = require('chai')
 const {join} = require('path')
 const {mkdtempSync} = require('fs')
 const {tmpdir} = require('os')
 
 const GitVersionWebpackPlugin = require('../../src/index')
 
-describe('GitVersionWebpackPlugin', function () {
-  beforeEach(function () {
-    this.workingPath = process.cwd()
-    this.temporaryPath = mkdtempSync(join(tmpdir(), 'git-version-webpack-plugin-'))
+describe('GitVersionWebpackPlugin', () => {
+  let temporaryPath, workingPath
 
-    process.chdir(this.temporaryPath)
+  beforeEach(() => {
+    workingPath = process.cwd()
+    temporaryPath = mkdtempSync(join(tmpdir(), 'git-version-webpack-plugin-'))
+
+    process.chdir(temporaryPath)
   })
 
-  afterEach(async function () {
-    process.chdir(this.workingPath)
+  afterEach(async () => {
+    process.chdir(workingPath)
 
-    await rmfr(this.temporaryPath)
+    await rmfr(temporaryPath)
   })
 
-  context('when there is no .git directory', function () {
-    beforeEach(function () {
-      this.subject = new GitVersionWebpackPlugin()
+  describe('when there is no .git directory', () => {
+    let subject
+
+    beforeEach(() => {
+      subject = new GitVersionWebpackPlugin()
     })
 
-    describe('version()', function () {
-      it('should throw an exception', async function () {
-        let error
-
-        try {
-          await this.subject.version()
-        } catch (e) {
-          error = e
-        }
-
-        expect(error).to.exist()
+    describe('version()', () => {
+      it('should throw an exception', async () => {
+        await expect(subject.version).rejects.toThrow()
       })
     })
   })
 
-  context('when there is a .git directory, but no commits', function () {
-    beforeEach(function () {
-      this.subject = new GitVersionWebpackPlugin()
+  describe('when there is a .git directory, but no commits', () => {
+    let subject
+
+    beforeEach(() => {
+      subject = new GitVersionWebpackPlugin()
 
       execFileSync('git', ['init'])
+      execFileSync('git', ['config', 'user.email', 'test@example.com'])
+      execFileSync('git', ['config', 'user.name', 'Test User'])
     })
 
-    describe('version()', function () {
-      it('should throw an exception', async function () {
-        let error
-
-        try {
-          await this.subject.version()
-        } catch (e) {
-          error = e
-        }
-
-        expect(error).to.exist()
+    describe('version()', () => {
+      it('should throw an exception', async () => {
+        await expect(subject.version).rejects.toThrow()
       })
     })
   })
 
-  context('when there is a commit', function () {
-    beforeEach(function () {
-      this.subject = new GitVersionWebpackPlugin()
+  describe('when there is a commit', () => {
+    let subject
+
+    beforeEach(() => {
+      subject = new GitVersionWebpackPlugin()
 
       execFileSync('git', ['init'])
+      execFileSync('git', ['config', 'user.email', 'test@example.com'])
+      execFileSync('git', ['config', 'user.name', 'Test User'])
       execFileSync('git', ['commit', '--allow-empty', '--message', 'Commit message.'])
     })
 
-    context('on an un-tagged commit', function () {
-      describe('version()', function () {
-        it('should return the branch name and short commit hash', async function () {
-          expect(await this.subject.version()).to.match(/^master@[a-f0-9]{7}$/)
+    describe('on an un-tagged commit', () => {
+      describe('version()', () => {
+        it('should return the branch name and short commit hash', async () => {
+          expect(await subject.version()).toMatch(/^master@[a-f0-9]{7}$/)
         })
       })
     })
 
-    context('on a commit with an annotated tag', function () {
-      beforeEach(function () {
+    describe('on a commit with an annotated tag', () => {
+      beforeEach(() => {
         execFileSync('git', ['tag', '--annotate', '--message', 'Tag message.', '1.2.3'])
       })
 
-      describe('version()', function () {
-        it('should return the tag name', async function () {
-          expect(await this.subject.version()).to.equal('1.2.3')
+      describe('version()', () => {
+        it('should return the tag name', async () => {
+          expect(await subject.version()).toBe('1.2.3')
         })
       })
     })
 
-    context('on a commit with a lightweight tag', function () {
-      beforeEach(function () {
+    describe('on a commit with a lightweight tag', () => {
+      beforeEach(() => {
         execFileSync('git', ['tag', '1.2.3'])
       })
 
-      describe('version()', function () {
-        it('should return the tag name', async function () {
-          expect(await this.subject.version()).to.equal('1.2.3')
+      describe('version()', () => {
+        it('should return the tag name', async () => {
+          expect(await subject.version()).toBe('1.2.3')
         })
       })
     })
 
-    context('on a commit with both annotated and lightweight tags', function () {
-      beforeEach(function () {
+    describe('on a commit with both annotated and lightweight tags', () => {
+      beforeEach(() => {
         execFileSync('git', ['tag', '--annotate', '--message', 'Tag message.', '1.2.3'])
         execFileSync('git', ['tag', '4.5.6'])
       })
 
-      describe('version()', function () {
-        it('should return the annotated tag name', async function () {
-          expect(await this.subject.version()).to.equal('1.2.3')
+      describe('version()', () => {
+        it('should return the annotated tag name', async () => {
+          expect(await subject.version()).toBe('1.2.3')
         })
       })
     })
 
-    context('on a commit that comes after a tag', function () {
-      beforeEach(function () {
+    describe('on a commit that comes after a tag', () => {
+      beforeEach(() => {
         execFileSync('git', ['tag', '--annotate', '--message', 'Tag message.', '1.2.3'])
         execFileSync('git', ['commit', '--allow-empty', '--message', 'Commit message.'])
       })
 
-      describe('version()', function () {
-        it('should return the branch name and short commit hash', async function () {
-          expect(await this.subject.version()).to.match(/^master@[a-f0-9]{7}$/)
+      describe('version()', () => {
+        it('should return the branch name and short commit hash', async () => {
+          expect(await subject.version()).toMatch(/^master@[a-f0-9]{7}$/)
         })
       })
     })
   })
 
-  context('when the version is manually specified', function () {
-    beforeEach(function () {
-      this.subject = new GitVersionWebpackPlugin({version: 'version-a'})
+  describe('when the version is manually specified', () => {
+    let subject
+
+    beforeEach(() => {
+      subject = new GitVersionWebpackPlugin({version: 'version-a'})
     })
 
-    describe('version()', function () {
-      it('should return the specified version', async function () {
-        expect(await this.subject.version()).to.equal('version-a')
+    describe('version()', () => {
+      it('should return the specified version', async () => {
+        expect(await subject.version()).toBe('version-a')
       })
     })
   })

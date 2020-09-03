@@ -1,5 +1,6 @@
+/.makefiles/
 /artifacts/
 /node_modules/
 /test/fixture/git/
-/yarn.lock
 /yarn-error.log
+/yarn.lock
