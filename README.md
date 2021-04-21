@@ -10,7 +10,7 @@
 [badge-build-link]: https://github.com/eloquent/git-version-webpack-plugin/actions/workflows/ci.yml
 [badge-coverage-image]: https://img.shields.io/codecov/c/gh/eloquent/git-version-webpack-plugin?style=for-the-badge
 [badge-coverage-link]: https://codecov.io/gh/eloquent/git-version-webpack-plugin
-[badge-version-image]: https://img.shields.io/npm/v/@eloquent/git-version-webpack-plugin?label=%40packula%2Fregexp&logo=npm&style=for-the-badge
+[badge-version-image]: https://img.shields.io/npm/v/@eloquent/git-version-webpack-plugin?label=%40eloquent%2Fgit-version-webpack-plugin&logo=npm&style=for-the-badge
 [badge-version-link]: https://npmjs.com/package/@eloquent/git-version-webpack-plugin
 
 ## Usage
