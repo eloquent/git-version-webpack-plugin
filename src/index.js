@@ -1,8 +1,9 @@
 const HtmlPlugin = require('safe-require')('html-webpack-plugin')
-const validateOptions = require('schema-utils')
+const {validate} = require('schema-utils')
 const {access: accessCps} = require('fs')
 const {execFile: execFileCps} = require('child_process')
 const {promisify} = require('util')
+const {Compilation} = require('webpack')
 
 const access = promisify(accessCps)
 const execFile = promisify(execFileCps)
@@ -38,7 +39,7 @@ const optionsSchema = {
 }
 
 module.exports = function GitVersionWebpackPlugin (options = {}) {
-  validateOptions(optionsSchema, options, {
+  validate(optionsSchema, options, {
     baseDataPath: 'options',
     name: '@eloquent/git-version-webpack-plugin',
   })
@@ -49,9 +50,11 @@ module.exports = function GitVersionWebpackPlugin (options = {}) {
     version: userVersion = '',
   } = options
 
+  let dependsOnGit = false
+
   this.apply = compiler => {
+    compiler.hooks.beforeCompile.tapPromise(PLUGIN_NAME, handleBeforeCompile)
     compiler.hooks.compilation.tap(PLUGIN_NAME, handleCompilation)
-    compiler.hooks.emit.tapPromise(PLUGIN_NAME, handleEmit)
   }
 
   this.version = version
@@ -76,16 +79,32 @@ module.exports = function GitVersionWebpackPlugin (options = {}) {
     return `${branch.toString().trim()}@${hash.toString().substring(0, 7)}`
   }
 
-  function handleCompilation (compilation) {
-    if (HtmlPlugin && HtmlPlugin.getHooks) {
-      HtmlPlugin.getHooks(compilation).alterAssetTags.tapPromise(PLUGIN_NAME, handleAlterAssetTags)
-    } else {
-      compilation.hooks.htmlWebpackPluginAlterAssetTags &&
-        compilation.hooks.htmlWebpackPluginAlterAssetTags.tapPromise(PLUGIN_NAME, handleAlterAssetTagsV3)
+  async function handleBeforeCompile () {
+    if (userVersion) return
+
+    try {
+      await access('.git')
+      dependsOnGit = true
+    } catch (e) {
+      dependsOnGit = false
     }
   }
 
-  async function handleEmit ({assets, fileDependencies, contextDependencies}) {
+  function handleCompilation (compilation) {
+    if (dependsOnGit) {
+      compilation.fileDependencies.add('.git/logs/HEAD') // commit hash and branch changes
+      compilation.contextDependencies.add('.git/refs/tags') // tag changes
+    }
+
+    compilation.hooks.processAssets.tapPromise(
+      {name: PLUGIN_NAME, stage: Compilation.PROCESS_ASSETS_STAGE_ADDITIONAL},
+      handleProcessAssets,
+    )
+
+    if (HtmlPlugin) HtmlPlugin.getHooks(compilation).alterAssetTags.tapPromise(PLUGIN_NAME, handleAlterAssetTags)
+  }
+
+  async function handleProcessAssets (assets) {
     // create the version file
     try {
       const v = await version()
@@ -100,18 +119,6 @@ module.exports = function GitVersionWebpackPlugin (options = {}) {
         size: () => 0,
       }
     }
-
-    if (userVersion) return
-
-    // watch for version changes
-    try {
-      await access('.git')
-    } catch (e) {
-      return // no .git directory
-    }
-
-    fileDependencies.add('.git/logs/HEAD') // commit hash and branch changes
-    contextDependencies.add('.git/refs/tags') // tag changes
   }
 
   async function handleAlterAssetTags (data) {
@@ -128,29 +135,6 @@ module.exports = function GitVersionWebpackPlugin (options = {}) {
     scripts.unshift({
       tagName: 'script',
       voidTag: false,
-      attributes: {
-        type: 'text/javascript',
-      },
-      innerHTML: `window[${JSON.stringify(versionName)}] = ${JSON.stringify(v)}`,
-    })
-
-    return data
-  }
-
-  async function handleAlterAssetTagsV3 (data) {
-    let v
-
-    try {
-      v = await version()
-    } catch (e) {
-      v = ''
-    }
-
-    const {body} = data
-
-    body.unshift({
-      tagName: 'script',
-      closeTag: true,
       attributes: {
         type: 'text/javascript',
       },

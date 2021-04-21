@@ -2,22 +2,18 @@
 
 *Pull Git version information into Webpack*
 
-[![Current version image][version-image]][current version]
-[![Current build status image][build-image]][current build status]
-[![Current coverage status image][coverage-image]][current coverage status]
+[![Current version][badge-version-image]][badge-version-link]
+[![Build status][badge-build-image]][badge-build-link]
+[![Test coverage][badge-coverage-image]][badge-coverage-link]
 
-[build-image]: https://img.shields.io/travis/eloquent/git-version-webpack-plugin/master.svg?style=flat-square "Current build status for the master branch"
-[coverage-image]: https://img.shields.io/codecov/c/github/eloquent/git-version-webpack-plugin/master.svg?style=flat-square "Current test coverage for the master branch"
-[current build status]: https://travis-ci.org/eloquent/git-version-webpack-plugin
-[current coverage status]: https://codecov.io/github/eloquent/git-version-webpack-plugin
-[current version]: https://www.npmjs.com/package/@eloquent/git-version-webpack-plugin
-[version-image]: https://img.shields.io/npm/v/@eloquent/git-version-webpack-plugin.svg?style=flat-square "This project uses semantic versioning"
+[badge-build-image]: https://img.shields.io/github/workflow/status/eloquent/git-version-webpack-plugin/CI?style=for-the-badge
+[badge-build-link]: https://github.com/eloquent/git-version-webpack-plugin/actions/workflows/ci.yml
+[badge-coverage-image]: https://img.shields.io/codecov/c/gh/eloquent/git-version-webpack-plugin?style=for-the-badge
+[badge-coverage-link]: https://codecov.io/gh/eloquent/git-version-webpack-plugin
+[badge-version-image]: https://img.shields.io/npm/v/@eloquent/git-version-webpack-plugin?label=%40packula%2Fregexp&logo=npm&style=for-the-badge
+[badge-version-link]: https://npmjs.com/package/@eloquent/git-version-webpack-plugin
 
-## Installation
-
-- Available as NPM package [@eloquent/git-version-webpack-plugin]
-
-[@eloquent/git-version-webpack-plugin]: https://www.npmjs.com/package/@eloquent/git-version-webpack-plugin
+## Usage
 
 ### Standalone usage
 
@@ -49,8 +45,9 @@ module.exports = {
 }
 ~~~
 
-Note that the order of plugins is significant. That is, `HtmlWebpackPlugin` must
-appear before `GitVersionPlugin`.
+Note that the order of plugins _may_ be significant. That is,
+`HtmlWebpackPlugin` _may_ need to appear before `GitVersionPlugin`. Although
+this no longer seems to be true under Webpack 5.
 
 ## Features
 

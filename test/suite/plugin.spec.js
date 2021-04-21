@@ -63,13 +63,14 @@ describe('GitVersionWebpackPlugin', () => {
       execFileSync('git', ['init'])
       execFileSync('git', ['config', 'user.email', 'test@example.com'])
       execFileSync('git', ['config', 'user.name', 'Test User'])
+      execFileSync('git', ['branch', '--move', 'branch-a'])
       execFileSync('git', ['commit', '--allow-empty', '--message', 'Commit message.'])
     })
 
     describe('on an un-tagged commit', () => {
       describe('version()', () => {
         it('should return the branch name and short commit hash', async () => {
-          expect(await subject.version()).toMatch(/^master@[a-f0-9]{7}$/)
+          expect(await subject.version()).toMatch(/^branch-a@[a-f0-9]{7}$/)
         })
       })
     })
@@ -119,7 +120,7 @@ describe('GitVersionWebpackPlugin', () => {
 
       describe('version()', () => {
         it('should return the branch name and short commit hash', async () => {
-          expect(await subject.version()).toMatch(/^master@[a-f0-9]{7}$/)
+          expect(await subject.version()).toMatch(/^branch-a@[a-f0-9]{7}$/)
         })
       })
     })
