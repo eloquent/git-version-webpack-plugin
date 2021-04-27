@@ -13,7 +13,7 @@
     "/src/"
   ],
   "engines": {
-    "node": ">=10"
+    "node": ">=12"
   },
   "dependencies": {
     "safe-require": "^1.0.3",
