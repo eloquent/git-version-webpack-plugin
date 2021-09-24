@@ -1,6 +1,7 @@
 const HtmlPlugin = require('safe-require')('html-webpack-plugin')
 const {validate} = require('schema-utils')
 const {access: accessCps} = require('fs')
+const {join} = require('path')
 const {execFile: execFileCps} = require('child_process')
 const {promisify} = require('util')
 const {Compilation} = require('webpack')
@@ -92,8 +93,9 @@ module.exports = function GitVersionWebpackPlugin (options = {}) {
 
   function handleCompilation (compilation) {
     if (dependsOnGit) {
-      compilation.fileDependencies.add('.git/logs/HEAD') // commit hash and branch changes
-      compilation.contextDependencies.add('.git/refs/tags') // tag changes
+      const {context} = compilation.compiler
+      compilation.fileDependencies.add(join(context, '.git/logs/HEAD')) // commit hash and branch changes
+      compilation.contextDependencies.add(join(context, '.git/refs/tags')) // tag changes
     }
 
     compilation.hooks.processAssets.tapPromise(
