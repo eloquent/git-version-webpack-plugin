@@ -77,7 +77,7 @@ describe('GitVersionWebpackPlugin', () => {
 
     describe('on a commit with an annotated tag', () => {
       beforeEach(() => {
-        execFileSync('git', ['tag', '--annotate', '--message', 'Tag message.', '1.2.3'])
+        execFileSync('git', ['tag', '--no-sign', '--annotate', '--message', 'Tag message.', '1.2.3'])
       })
 
       describe('version()', () => {
@@ -89,7 +89,7 @@ describe('GitVersionWebpackPlugin', () => {
 
     describe('on a commit with a lightweight tag', () => {
       beforeEach(() => {
-        execFileSync('git', ['tag', '1.2.3'])
+        execFileSync('git', ['tag', '--no-sign', '1.2.3'])
       })
 
       describe('version()', () => {
@@ -101,8 +101,8 @@ describe('GitVersionWebpackPlugin', () => {
 
     describe('on a commit with both annotated and lightweight tags', () => {
       beforeEach(() => {
-        execFileSync('git', ['tag', '--annotate', '--message', 'Tag message.', '1.2.3'])
-        execFileSync('git', ['tag', '4.5.6'])
+        execFileSync('git', ['tag', '--no-sign', '--annotate', '--message', 'Tag message.', '1.2.3'])
+        execFileSync('git', ['tag', '--no-sign', '4.5.6'])
       })
 
       describe('version()', () => {
@@ -114,7 +114,7 @@ describe('GitVersionWebpackPlugin', () => {
 
     describe('on a commit that comes after a tag', () => {
       beforeEach(() => {
-        execFileSync('git', ['tag', '--annotate', '--message', 'Tag message.', '1.2.3'])
+        execFileSync('git', ['tag', '--no-sign', '--annotate', '--message', 'Tag message.', '1.2.3'])
         execFileSync('git', ['commit', '--allow-empty', '--message', 'Commit message.'])
       })
 
