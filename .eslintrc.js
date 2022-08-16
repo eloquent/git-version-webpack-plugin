@@ -1,49 +1,80 @@
 module.exports = {
   extends: [
-    'standard',
-    'plugin:jest/recommended',
-    'plugin:jest/style',
+    "eslint:recommended",
+    "plugin:n/recommended",
+    "plugin:import/recommended",
+    "plugin:import/typescript",
+    "plugin:promise/recommended",
+    "prettier",
   ],
-  plugins: [
-    'jest',
-  ],
+  parserOptions: {
+    sourceType: "module",
+    ecmaFeatures: {
+      jsx: true,
+    },
+  },
   env: {
-    jest: true,
+    es2022: true,
     node: true,
   },
   rules: {
-    'arrow-parens': ['error', 'as-needed'],
-    'comma-dangle': ['error', {
-      arrays: 'always-multiline',
-      objects: 'always-multiline',
-      imports: 'always-multiline',
-      exports: 'always-multiline',
-      functions: 'always-multiline',
-    }],
-    'no-unused-vars': 'error',
-    'object-curly-spacing': ['error', 'never'],
-    'padding-line-between-statements': ['error', {
-      blankLine: 'always',
-      prev: '*',
-      next: 'return',
-    }],
-    'prefer-const': 'error',
-    'quote-props': ['error', 'as-needed'],
-
-    'node/file-extension-in-import': ['error', 'always'],
-    'node/no-deprecated-api': 'error',
-    'node/no-extraneous-import': 'error',
-    'node/no-extraneous-require': 'error',
-    'node/no-missing-import': 'error',
-    'node/no-unpublished-bin': 'error',
-    'node/no-unpublished-import': 'error',
-    'node/no-unpublished-require': 'error',
-    'node/no-unsupported-features/es-builtins': 'error',
-    'node/no-unsupported-features/es-syntax': 'error',
-    'node/no-unsupported-features/node-builtins': 'error',
-    'node/process-exit-as-throw': 'error',
-    'node/shebang': 'error',
-
-    'jest/no-focused-tests': 'warn',
+    "no-unused-vars": [
+      "error",
+      {
+        // allow unused args if they start with _
+        argsIgnorePattern: "^_",
+      },
+    ],
+    // handled by import/no-unresolved
+    "n/no-missing-import": "off",
+    // don't check for unsupported features - too much config to make this work
+    "n/no-unsupported-features/es-builtins": "off",
+    "n/no-unsupported-features/es-syntax": "off",
+    "n/no-unsupported-features/node-builtins": "off",
   },
-}
+  overrides: [
+    {
+      files: ["*.ts", "*.tsx"],
+      extends: [
+        "plugin:@typescript-eslint/recommended",
+        "plugin:@typescript-eslint/recommended-requiring-type-checking",
+      ],
+      parserOptions: {
+        project: "./tsconfig.json",
+      },
+      settings: {
+        "import/resolver": "typescript",
+      },
+      rules: {
+        "@typescript-eslint/no-unused-vars": [
+          "error",
+          {
+            // allow unused args if they start with _
+            argsIgnorePattern: "^_",
+          },
+        ],
+      },
+    },
+    {
+      files: [
+        "*.spec.js",
+        "*.spec.jsx",
+        "*.spec.ts",
+        "*.spec.tsx",
+        "*.test.js",
+        "*.test.jsx",
+        "*.test.ts",
+        "*.test.tsx",
+      ],
+      extends: ["plugin:jest/recommended"],
+      plugins: ["jest"],
+      env: {
+        jest: true,
+      },
+      rules: {
+        // focused tests that make it to CI will cause a build failure
+        "jest/no-focused-tests": "warn",
+      },
+    },
+  ],
+};

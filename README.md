@@ -1,6 +1,6 @@
 # Git version Webpack plugin
 
-*Pull Git version information into Webpack*
+_Pull Git version information into Webpack_
 
 [![Current version][badge-version-image]][badge-version-link]
 [![Build status][badge-build-image]][badge-build-link]
@@ -17,33 +17,28 @@
 
 ### Standalone usage
 
-~~~js
+```js
 // webpack.config.js
 
-const GitVersionPlugin = require('@eloquent/git-version-webpack-plugin')
+const GitVersionPlugin = require("@eloquent/git-version-webpack-plugin");
 
 module.exports = {
-  plugins: [
-    new GitVersionPlugin(),
-  ],
-}
-~~~
+  plugins: [new GitVersionPlugin()],
+};
+```
 
 ### Usage with [html-webpack-plugin]
 
-~~~js
+```js
 // webpack.config.js
 
-const GitVersionPlugin = require('@eloquent/git-version-webpack-plugin')
-const HtmlPlugin = require('html-webpack-plugin')
+const GitVersionPlugin = require("@eloquent/git-version-webpack-plugin");
+const HtmlPlugin = require("html-webpack-plugin");
 
 module.exports = {
-  plugins: [
-    new HtmlPlugin(),
-    new GitVersionPlugin(),
-  ],
-}
-~~~
+  plugins: [new HtmlPlugin(), new GitVersionPlugin()],
+};
+```
 
 Note that the order of plugins _may_ be significant. That is,
 `HtmlWebpackPlugin` _may_ need to appear before `GitVersionPlugin`. Although
@@ -61,12 +56,12 @@ this no longer seems to be true under Webpack 5.
 
 The following options can be passed to the plugin constructor:
 
-- `path`    - The path to use for the version file, relative to the
-              [output path]. Defaults to `VERSION`.
-- `name`    - The name to use for the version variable, accessible on the
-              `window` object. Defaults to `VERSION`.
+- `path` - The path to use for the version file, relative to the
+  [output path]. Defaults to `VERSION`.
+- `name` - The name to use for the version variable, accessible on the
+  `window` object. Defaults to `VERSION`.
 - `version` - Can be used to manually override the version. Useful in the event
-              that Git is not available.
+  that Git is not available.
 
 [html-webpack-plugin]: https://github.com/jantimon/html-webpack-plugin
 [output path]: https://webpack.js.org/configuration/output/#output-path
