@@ -6,7 +6,7 @@ _Pull Git version information into Webpack_
 [![Build status][badge-build-image]][badge-build-link]
 [![Test coverage][badge-coverage-image]][badge-coverage-link]
 
-[badge-build-image]: https://img.shields.io/github/workflow/status/eloquent/git-version-webpack-plugin/CI?style=for-the-badge
+[badge-build-image]: https://img.shields.io/github/actions/workflow/status/eloquent/git-version-webpack-plugin/ci.yml?branch=main&style=for-the-badge
 [badge-build-link]: https://github.com/eloquent/git-version-webpack-plugin/actions/workflows/ci.yml
 [badge-coverage-image]: https://img.shields.io/codecov/c/gh/eloquent/git-version-webpack-plugin?style=for-the-badge
 [badge-coverage-link]: https://codecov.io/gh/eloquent/git-version-webpack-plugin
